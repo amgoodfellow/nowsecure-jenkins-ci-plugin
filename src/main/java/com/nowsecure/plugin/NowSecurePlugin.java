@@ -80,7 +80,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
                 .findFirst();
     }
 
-    private Map<String, String> getProxyEnvvars(ProxyConfiguration configuration) {
+    private Map<String, String> getProxyEnvVars(ProxyConfiguration configuration) {
         if (configuration == null) {
             return Map.of();
         }
@@ -127,7 +127,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         final var token = credential.getSecret().getPlainText();
 
         final var tool = new NowSecureBinary(arch, osName, workspace)
-                .addEnvVars(getProxyEnvvars(Jenkins.get().getProxy()))
+                .addEnvVars(getProxyEnvVars(Jenkins.get().getProxy()))
                 .addArgument("run")
                 .addArgument("file", binaryFile.toURI().getPath())
                 .addArgument("--group-ref", group)
@@ -137,7 +137,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
                 .addArgument("--analysis-type", analysisType.toString().toLowerCase())
                 .addArgument("--save-findings")
                 .addArgument("--artifacts-dir", artifactDir)
-                .addArgument("--output", String.format("%s%sassessment.json", artifactDir, File.pathSeparator))
+                .addArgument("--output", String.format("%s%sassessment.json", artifactDir, File.separator))
                 .addArgument("--minimum-score", String.valueOf(minimumScore))
                 .addArgument("--poll-for-minutes", String.valueOf(pollingDurationMinutes))
                 .addArgument("--ci-environment", "jenkins")

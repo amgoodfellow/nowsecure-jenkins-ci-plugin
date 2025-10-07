@@ -103,11 +103,8 @@ public class NowSecureBinary {
     }
 
     public ProcStarter startProc(Launcher launcher, TaskListener listener) throws IOException {
-        listener.getLogger().println("Argument size: " + this.arguments.size());
-        listener.getLogger().println("Mask Index" + this.maskedIndices);
 
         var masks = createMaskedArray();
-        listener.getLogger().println("Masked size: " + masks.length);
         return launcher.launch()
                 .envs(this.environmentVariables)
                 .cmds(this.arguments)
