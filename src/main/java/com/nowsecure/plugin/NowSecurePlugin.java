@@ -13,6 +13,7 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Item;
@@ -22,10 +23,12 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
@@ -77,6 +80,25 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
                 .findFirst();
     }
 
+    private Map<String, String> getProxyEnvvars(ProxyConfiguration configuration) {
+        if (configuration == null) {
+            return Map.of();
+        }
+
+        final var host = configuration.getName();
+        final var port = configuration.getPort();
+
+        final var user = configuration.getUserName();
+        final var pass = Secret.toString(configuration.getSecretPassword());
+
+        final var authentication =
+                (StringUtils.isEmpty(user) && StringUtils.isEmpty(pass)) ? "" : String.format("%s:%s@", user, pass);
+
+        final var httpProxy = String.format("http://%s%s:%d", authentication, host, port);
+
+        return Map.of("HTTP_PROXY", httpProxy, "HTTPS_PROXY", httpProxy, "NO_PROXY", configuration.getNoProxyHost());
+    }
+
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, EnvVars env, Launcher launcher, TaskListener listener)
             throws InterruptedException, IOException {
@@ -88,14 +110,12 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         if (!binaryFile.exists()) {
             var errorMessage = String.format("Cannot find binary file at path: %s", binaryFile.toURI());
             listener.error(errorMessage);
-            run.setResult(hudson.model.Result.FAILURE);
             throw new AbortException(errorMessage);
         }
 
         if (optionalCredentials.isEmpty()) {
             var errorMessage = "Could not find a TextCredential matching the specified credentialId";
             listener.error(errorMessage);
-            run.setResult(hudson.model.Result.FAILURE);
             throw new AbortException(errorMessage);
         }
 
@@ -106,7 +126,12 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
 
         final var token = credential.getSecret().getPlainText();
 
+        var envs = getProxyEnvvars(Jenkins.get().getProxy());
+
+        listener.getLogger().println(envs);
+
         final var tool = new NowSecureBinary(arch, osName, workspace)
+                .addEnvVars(envs)
                 .addArgument("run")
                 .addArgument("file", binaryFile.toURI().getPath())
                 .addArgument("--group-ref", group)
@@ -126,7 +151,6 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
 
         if (exitCode != 0) {
             listener.getLogger().println("Exit Code: " + exitCode);
-            run.setResult(hudson.model.Result.FAILURE);
             throw new AbortException("NowSecure binary finished with nonzero exit code");
         }
     }

@@ -7,12 +7,14 @@ import hudson.model.TaskListener;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 public class NowSecureBinary {
     List<String> arguments = new LinkedList<>();
     // Refers to the index of the arguments list that should be masked
     List<Integer> maskedIndices = new LinkedList<>();
+    Map<String, String> environmentVariables = Map.of();
     FilePath toolPath;
     FilePath workspace;
     String toolName;
@@ -72,6 +74,11 @@ public class NowSecureBinary {
         return this;
     }
 
+    public NowSecureBinary addEnvVars(Map<String, String> vars) {
+        this.environmentVariables = vars;
+        return this;
+    }
+
     public NowSecureBinary addArgument(String flag, String value) {
         if (value != null && !StringUtils.isBlank(value)) {
             this.arguments.addAll(List.of(flag, value));
@@ -102,6 +109,7 @@ public class NowSecureBinary {
         var masks = createMaskedArray();
         listener.getLogger().println("Masked size: " + masks.length);
         return launcher.launch()
+                .envs(this.environmentVariables)
                 .cmds(this.arguments)
                 .masks(masks)
                 .pwd(this.workspace)
