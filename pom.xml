@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
     <version>5.26</version>
     <relativePath />
   </parent>
-
   <groupId>com.nowsecure.plugin</groupId>
   <artifactId>nowsecure-ci-assessments</artifactId>
   <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
-
   <name>NowSecure CI Assessments</name>
   <description>NowSecure provides purpose-built, fully automated mobile application security testing (static and dynamic) for your development pipeline</description>
-  <url>https://github.com/nowsecure/nowsecure-jenkins-ci-plugin</url>
+  <url>https://github.com/jenkinsci/nowsecure-ci-assessments-plugin</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -29,11 +26,9 @@
     <tag>${scmTag}</tag>
     <url>https://github.com/${gitHubRepo}</url>
   </scm>
-
   <properties>
     <revision>0.1</revision>
     <changelist>-SNAPSHOT</changelist>
-
     <!-- Note: this is mainly determined by the credentials and plain-credentials plugin -->
     <jenkins.baseline>2.479</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
@@ -41,7 +36,6 @@
     <spotless.check.skip>false</spotless.check.skip>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -88,7 +82,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
