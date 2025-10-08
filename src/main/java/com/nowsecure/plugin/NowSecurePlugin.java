@@ -168,6 +168,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
 
         // Has to be of the form 'doCheck<FieldName>'
         // The @QueryParameter annotation injects the value from the form field.
+        @POST
         public FormValidation doCheckBinaryFile(@QueryParameter String binaryFile) {
             if (StringUtils.isBlank(binaryFile)) {
                 return FormValidation.error("Target Filename cannot be empty.");
@@ -175,6 +176,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doCheckGroup(@QueryParameter String group) {
             if (StringUtils.isBlank(group)) {
                 return FormValidation.error("Group Ref cannot be empty.");
@@ -182,6 +184,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doCheckTokenCredentialItems(@QueryParameter String tokenCredentialId) {
             if (StringUtils.isBlank(tokenCredentialId)) {
                 return FormValidation.error("Token Credential cannot be empty");
@@ -189,6 +192,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doCheckApiHost(@QueryParameter String apiHost) {
             if (!StringUtils.isBlank(apiHost)) {
                 try {
@@ -200,6 +204,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doCheckUiHost(@QueryParameter String uiHost) {
             if (!StringUtils.isBlank(uiHost)) {
                 try {
