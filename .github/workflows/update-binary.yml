@@ -3,8 +3,8 @@ name: Update Binary
 on:
   workflow_dispatch:
   schedule:
-    # Mon at 5am weekly
-    - cron: "00 5 * * 0"
+    # Mon at 5am on the first of the month
+    - cron: "00 5 1 * *"
 
 jobs:
   update-binary:
