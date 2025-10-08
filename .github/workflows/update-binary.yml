@@ -1,0 +1,59 @@
+name: Update Binary
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Mon at 5am on the first of the month
+    - cron: "00 5 1 * *"
+
+jobs:
+  update-binary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Latest Release
+        working-directory: ./src/main/resources
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST_VERSION=$(gh release --repo nowsecure/nowsecure-ci view --json tagName --jq '.tagName')
+          CURRENT_VERSION=$(cat version)
+
+          if [ "$LATEST_VERSION" = "$CURRENT_VERSION" ]; then
+            echo "Current version ($CURRENT_VERSION) is latest"
+          else
+            echo "$LATEST_VERSION" > version
+
+            find . -name 'ns_*' -delete
+
+            gh release --repo nowsecure/nowsecureci download --clobber \
+              --pattern 'ns_darwin-arm64*' \
+              --pattern 'ns_linux-amd64*' \
+              --pattern 'ns_windows-amd64*'
+
+            # Github release has tgz and zip files, each containing license and readme files
+            find . -name '*.tgz' -exec tar -xzf {} \;
+            find . -name '*.zip' -exec unzip {} \;
+            rm LICENSE README.md
+
+            echo "RELEASE_NOTES=$(gh release --repo nowsecure/nowsecure-ci view --json body --jq '.body')" >> "$GITHUB_ENV"
+          fi
+
+          echo "LATEST_VERSION=$LATEST_VERSION" >> "$GITHUB_ENV"
+
+      - name: Commit changes
+        working-directory: ./src/main/resources
+        run: |
+          PR_TITLE="chore(deps): update nowsecure-ci binary to ${{ env.LATEST_VERSION }}"
+          BRANCH_NAME="chore/ns-binary/${{ env.LATEST_VERSION }}"
+
+          git config --global user.email "devops@nowsecure.com"
+          git config --global user.name "Nora The Narwhal"
+
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git checkout -b "$BRANCH_NAME"
+            git add .
+            git commit -m "$PR_TITLE"
+            git push
+            gh pr create --title "$PR_TITLE" --body "# NowSecure CI Release Notes \n ${{ env.RELEASE_NOTES }}"
+          fi
