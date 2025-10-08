@@ -16,6 +16,7 @@ import hudson.Launcher;
 import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.AbstractProject;
+import hudson.model.Computer;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -99,11 +100,28 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         return Map.of("HTTP_PROXY", httpProxy, "HTTPS_PROXY", httpProxy, "NO_PROXY", configuration.getNoProxyHost());
     }
 
+    public String getStringProperty(Computer computer, String propName)
+            throws AbortException, InterruptedException, IOException {
+        var properties = computer.getSystemProperties();
+        if (properties != null && properties.get(propName) instanceof String str) {
+            return str;
+        } else {
+            throw new AbortException(String.format("Unexpected type for system property '%s'", propName));
+        }
+    }
+
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, EnvVars env, Launcher launcher, TaskListener listener)
             throws InterruptedException, IOException {
-        final var arch = System.getProperty("os.arch");
-        final var osName = System.getProperty("os.name");
+
+        final var worker = workspace.toComputer();
+        if (worker == null) {
+            throw new AbortException("Workspace not a file on a particular Computer");
+        }
+
+        final var arch = getStringProperty(worker, "os.arch");
+        final var osName = getStringProperty(worker, "os.name");
+
         final var binaryFile = workspace.child(binaryFilePath);
         final var optionalCredentials = getCredentials(tokenCredentialId);
 
