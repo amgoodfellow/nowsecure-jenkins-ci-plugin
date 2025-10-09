@@ -64,7 +64,7 @@ class NowSecureBinaryTests {
         var nsb = new NowSecureBinary(arch, osName, new FilePath(new File(resourceDir.getPath())));
         var toolName = NowSecureBinary.getToolName(arch, osName);
 
-        var constructedToolPath = nsb.toolPath.toURI().getPath();
+        var constructedToolPath = nsb.toolPath.getRemote();
 
         Assertions.assertEquals(
                 String.format("%s%s", resourceDir.getPath(), toolName),
