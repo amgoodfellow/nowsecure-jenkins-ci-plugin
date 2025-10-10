@@ -17,6 +17,11 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    - name: sanity-check
+      run: |
+        echo "Processor Architecture: %PROCESSOR_ARCHITECTURE%"
+        java -version
+
     - name: Formatting
       run: mvn spotless:check
 
