@@ -66,7 +66,7 @@ public class NowSecureBinary {
         }
         this.toolPath.chmod(0755);
 
-        this.arguments.add(String.format("\"%s\"", this.toolPath.getRemote()));
+        this.arguments.add(String.format("%s", this.toolPath.getRemote()));
     }
 
     public NowSecureBinary addArgument(String flag) {
