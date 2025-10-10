@@ -66,8 +66,7 @@ public class NowSecureBinary {
         }
         this.toolPath.chmod(0755);
 
-        // this.arguments.add(this.toolPath.getRemote());
-        this.arguments.add("dir");
+        this.arguments.add(this.toolPath.getRemote());
     }
 
     public NowSecureBinary addArgument(String flag) {
