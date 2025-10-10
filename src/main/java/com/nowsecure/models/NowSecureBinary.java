@@ -66,7 +66,8 @@ public class NowSecureBinary {
         }
         this.toolPath.chmod(0755);
 
-        this.arguments.add(String.format("%s", this.toolPath.getRemote()));
+        // this.arguments.add(this.toolPath.getRemote());
+        this.arguments.add("dir");
     }
 
     public NowSecureBinary addArgument(String flag) {
@@ -103,11 +104,10 @@ public class NowSecureBinary {
     }
 
     public ProcStarter startProc(Launcher launcher, TaskListener listener) throws IOException {
-
         var masks = createMaskedArray();
         return launcher.launch()
                 .envs(this.environmentVariables)
-                .cmds(this.arguments)
+                .cmds(this.arguments.get(0))
                 .masks(masks)
                 .pwd(this.workspace)
                 .stdout(listener)
