@@ -147,7 +147,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         final var tool = new NowSecureBinary(arch, osName, workspace)
                 .addEnvVars(getProxyEnvVars(Jenkins.get().getProxy()))
                 .addArgument("run")
-                .addArgument("file", binaryFile.toURI().getPath())
+                .addArgument("file", binaryFile.getRemote())
                 .addArgument("--group-ref", group)
                 .addArgument("--api-host", apiHost)
                 .addArgument("--ui-host", uiHost)

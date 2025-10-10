@@ -27,10 +27,14 @@
               pkgs.jdk17
               pkgs.maven
               pkgs.jdt-language-server
+
+              pkgs.act
             ];
 
             # Environment variables
-            env = { JAVA_HOME="${pkgs.jdk17}"; };
+            env = {
+              JAVA_HOME = "${pkgs.jdk17}";
+            };
           };
         };
       }
