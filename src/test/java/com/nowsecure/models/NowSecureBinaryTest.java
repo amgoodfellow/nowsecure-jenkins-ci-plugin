@@ -65,10 +65,10 @@ class NowSecureBinaryTests {
         var nsb = new NowSecureBinary(arch, osName, new FilePath(new File(resourceDir.getPath())));
         var toolName = NowSecureBinary.getToolName(arch, osName);
 
-        var constructedToolPath = nsb.toolPath.getRemote();
+        var constructedToolPath = "\"" + nsb.toolPath.getRemote() + "\"";
 
         Assertions.assertEquals(
-                String.format("%s%s%s", Paths.get(resourceDir.toURI()).toString(), File.separator, toolName),
+                String.format("\"%s%s%s\"", Paths.get(resourceDir.toURI()).toString(), File.separator, toolName),
                 constructedToolPath,
                 "Tool path does not look like it should");
 
