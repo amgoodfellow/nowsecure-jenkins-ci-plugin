@@ -4,6 +4,7 @@ import static org.junit.Assert.assertThrows;
 
 import hudson.FilePath;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -64,10 +65,10 @@ class NowSecureBinaryTests {
         var nsb = new NowSecureBinary(arch, osName, new FilePath(new File(resourceDir.getPath())));
         var toolName = NowSecureBinary.getToolName(arch, osName);
 
-        var constructedToolPath = nsb.toolPath.toURI().getPath();
+        var constructedToolPath = nsb.toolPath.getRemote();
 
         Assertions.assertEquals(
-                String.format("%s%s", resourceDir.getPath(), toolName),
+                String.format("%s%s%s", Paths.get(resourceDir.toURI()).toString(), File.separator, toolName),
                 constructedToolPath,
                 "Tool path does not look like it should");
         Assertions.assertEquals(
