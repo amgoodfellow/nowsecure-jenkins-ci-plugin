@@ -13,7 +13,6 @@ import hudson.model.Result;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import java.io.IOException;
-import java.util.List;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -51,9 +50,7 @@ class NowSecurePluginTest {
         setupCredentials(jenkins, id, "some-text");
         var builder = new NowSecurePlugin(binaryFilePath, group, id);
         project.getBuildersList().add(builder);
-        var ws = project.getWorkspace().list();
-        var build = jenkins.buildAndAssertStatus(Result.FAILURE, project);
-        Assertions.assertEquals(ws, List.of(""));
+        var build = jenkins.buildAndAssertStatus(Result.SUCCESS, project);
         jenkins.assertLogContains("Finished: SUCCESS", build);
     }
 

@@ -25,6 +25,7 @@ import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
@@ -145,21 +146,20 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
 
         final var tool = new NowSecureBinary(arch, osName, workspace)
                 .addEnvVars(getProxyEnvVars(Jenkins.get().getProxy()))
-                .addArgument("--version");
-        // .addArgument("run")
-        // .addArgument("file", binaryFile.getRemote())
-        // .addArgument("--group-ref", group)
-        // .addArgument("--api-host", apiHost)
-        // .addArgument("--ui-host", uiHost)
-        // .addArgument("--log-level", logLevel.toString().toLowerCase())
-        // .addArgument("--analysis-type", analysisType.toString().toLowerCase())
-        // .addArgument("--save-findings")
-        // .addArgument("--artifacts-dir", artifactDir)
-        // .addArgument("--output", String.format("%s%sassessment.json", artifactDir, File.separator))
-        // .addArgument("--minimum-score", String.valueOf(minimumScore))
-        // .addArgument("--poll-for-minutes", String.valueOf(pollingDurationMinutes))
-        // .addArgument("--ci-environment", "jenkins")
-        // .addToken(token);
+                .addArgument("run")
+                .addArgument("file", binaryFile.getRemote())
+                .addArgument("--group-ref", group)
+                .addArgument("--api-host", apiHost)
+                .addArgument("--ui-host", uiHost)
+                .addArgument("--log-level", logLevel.toString().toLowerCase())
+                .addArgument("--analysis-type", analysisType.toString().toLowerCase())
+                .addArgument("--save-findings")
+                .addArgument("--artifacts-dir", artifactDir)
+                .addArgument("--output", String.format("%s%sassessment.json", artifactDir, File.separator))
+                .addArgument("--minimum-score", String.valueOf(minimumScore))
+                .addArgument("--poll-for-minutes", String.valueOf(pollingDurationMinutes))
+                .addArgument("--ci-environment", "jenkins")
+                .addToken(token);
 
         final var exitCode = tool.startProc(launcher, listener).join();
 
