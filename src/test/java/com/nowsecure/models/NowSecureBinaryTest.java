@@ -6,6 +6,8 @@ import hudson.FilePath;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
+
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -44,7 +46,7 @@ class NowSecureBinaryTests {
         Assertions.assertTrue(exception.getMessage().contains("Unsupported platform / architecture"));
     }
 
-    // @Test
+    @Test
     void shouldTrackTokenIndeces() throws Exception {
         var resourceDir = this.getClass().getClassLoader().getResource("./");
         var nsb = new NowSecureBinary(arch, osName, new FilePath(new File(resourceDir.getPath())));
@@ -58,6 +60,7 @@ class NowSecureBinaryTests {
         Assertions.assertEquals(nsb.arguments.size(), 8);
     }
 
+    @Test
     void shouldAddToolPathToProcessArgumentList() throws Exception {
         var resourceDir = this.getClass().getClassLoader().getResource("./");
         var nsb = new NowSecureBinary(arch, osName, new FilePath(new File(resourceDir.getPath())));

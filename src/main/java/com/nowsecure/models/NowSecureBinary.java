@@ -4,6 +4,8 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Launcher.ProcStarter;
 import hudson.model.TaskListener;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,6 +67,11 @@ public class NowSecureBinary {
             this.toolPath.copyFrom(inputStream);
         }
         this.toolPath.chmod(0755);
+        final File downloadedFile = new File(this.toolPath.getRemote());
+        boolean result = downloadedFile.setExecutable(true, false);
+        if (!result) {
+          throw new RuntimeException(String.format("Failed to set file as executable. (%s)", downloadedFile.getAbsolutePath()));
+        }
 
         this.arguments.add(this.toolPath.getRemote());
     }
