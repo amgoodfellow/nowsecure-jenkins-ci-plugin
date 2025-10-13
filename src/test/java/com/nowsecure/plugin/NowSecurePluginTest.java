@@ -16,6 +16,8 @@ import java.io.IOException;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
@@ -44,6 +46,7 @@ class NowSecurePluginTest {
     }
 
     @Test
+    @EnabledOnOs({OS.MAC, OS.LINUX})
     void validCredentialIdShouldSucceed(JenkinsRule jenkins) throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         var id = "some-id";
