@@ -113,7 +113,7 @@ public class NowSecureBinary {
         var masks = createMaskedArray();
         return launcher.launch()
                 .envs(this.environmentVariables)
-                .cmds(this.arguments.get(0))
+                .cmds(this.arguments)
                 .masks(masks)
                 .pwd(this.workspace)
                 .stdout(listener)
