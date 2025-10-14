@@ -9,7 +9,7 @@
   </parent>
   <groupId>io.jenkins.plugins</groupId>
   <artifactId>nowsecure-ci-assessments</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>${revision}-${changelist}</version>
   <packaging>hpi</packaging>
   <name>NowSecure CI Assessments</name>
   <description>NowSecure provides purpose-built, fully automated mobile application security testing (static and dynamic) for your development pipeline</description>
@@ -27,8 +27,8 @@
     <url>https://github.com/${gitHubRepo}</url>
   </scm>
   <properties>
-    <revision>0.1</revision>
-    <changelist>-SNAPSHOT</changelist>
+    <revision>0.0.1-alpha</revision>
+    <changelist>999999-SNAPSHOT</changelist>
     <!-- Note: this is mainly determined by the credentials and plain-credentials plugin -->
     <jenkins.baseline>2.479</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
