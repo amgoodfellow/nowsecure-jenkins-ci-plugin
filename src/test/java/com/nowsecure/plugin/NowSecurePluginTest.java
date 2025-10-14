@@ -1,6 +1,7 @@
 package com.nowsecure.plugin;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -14,7 +15,6 @@ import hudson.util.FormValidation;
 import hudson.util.Secret;
 import java.io.IOException;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -24,10 +24,10 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 @WithJenkins
 class NowSecurePluginTest {
 
-    final String binaryFilePath = "./";
-    final String group = "group";
+    private static final String BINARY_FILE_PATH = "./";
+    private static final String GROUP = "group";
 
-    public void setupCredentials(JenkinsRule jenkins, String secretId, String secretText) throws IOException {
+    private void setupCredentials(JenkinsRule jenkins, String secretId, String secretText) throws IOException {
         var secret = Secret.fromString(secretText);
         StringCredentialsImpl credential =
                 new StringCredentialsImpl(CredentialsScope.GLOBAL, secretId, "Test plain text credential", secret);
@@ -39,7 +39,7 @@ class NowSecurePluginTest {
     @Test
     void invalidCredentialIdShouldFail(JenkinsRule jenkins) throws Exception {
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        var builder = new NowSecurePlugin(binaryFilePath, group, "bad token credential id");
+        var builder = new NowSecurePlugin(BINARY_FILE_PATH, GROUP, "bad token credential id");
         project.getBuildersList().add(builder);
         var build = jenkins.buildAndAssertStatus(Result.FAILURE, project);
         jenkins.assertLogContains("Could not find a TextCredential matching the specified credentialId", build);
@@ -51,7 +51,7 @@ class NowSecurePluginTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         var id = "some-id";
         setupCredentials(jenkins, id, "some-text");
-        var builder = new NowSecurePlugin(binaryFilePath, group, id);
+        var builder = new NowSecurePlugin(BINARY_FILE_PATH, GROUP, id);
         project.getBuildersList().add(builder);
         var build = jenkins.buildAndAssertStatus(Result.SUCCESS, project);
         jenkins.assertLogNotContains("Could not find a TextCredential matching the specified credentialId", build);
@@ -65,7 +65,7 @@ class NowSecurePluginTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         var id = "some-id";
         setupCredentials(jenkins, id, "some-text");
-        var builder = new NowSecurePlugin(binaryFilePath, group, id);
+        var builder = new NowSecurePlugin(BINARY_FILE_PATH, GROUP, id);
         project.getBuildersList().add(builder);
         var build = jenkins.buildAndAssertStatus(Result.FAILURE, project);
         jenkins.assertLogNotContains("Could not find a TextCredential matching the specified credentialId", build);
@@ -75,7 +75,7 @@ class NowSecurePluginTest {
     void shouldAllowUsersToOverrideURLs(JenkinsRule jenkins) throws Exception {
         var id = "some-id";
         setupCredentials(jenkins, id, "some-text");
-        var nsStep = new NowSecurePlugin(binaryFilePath, group, id);
+        var nsStep = new NowSecurePlugin(BINARY_FILE_PATH, GROUP, id);
 
         var apiUrl = "https://httpbin.org/api";
         var uiUrl = "https://httpbin.org/ui";
@@ -83,8 +83,8 @@ class NowSecurePluginTest {
         nsStep.setApiHost(apiUrl);
         nsStep.setUiHost(uiUrl);
 
-        Assertions.assertEquals(apiUrl, nsStep.getApiHost());
-        Assertions.assertEquals(uiUrl, nsStep.getUiHost());
+        assertEquals(apiUrl, nsStep.getApiHost());
+        assertEquals(uiUrl, nsStep.getUiHost());
     }
 
     @Test
@@ -92,7 +92,7 @@ class NowSecurePluginTest {
         FreeStyleProject project = jenkins.createFreeStyleProject();
         var id = "some-id";
         setupCredentials(jenkins, id, "some-text");
-        var nsStep = new NowSecurePlugin(binaryFilePath, group, id);
+        var nsStep = new NowSecurePlugin(BINARY_FILE_PATH, GROUP, id);
 
         var apiUrl = "https://httpbin.org/api";
         var uiUrl = "https://httpbin.org/ui";
@@ -117,8 +117,8 @@ class NowSecurePluginTest {
         assertNotNull(reloadedStep);
 
         // Data bound constructor fields
-        assertEquals(binaryFilePath, reloadedStep.getBinaryFilePath());
-        assertEquals(group, reloadedStep.getGroup());
+        assertEquals(BINARY_FILE_PATH, reloadedStep.getBinaryFilePath());
+        assertEquals(GROUP, reloadedStep.getGroup());
         assertEquals(id, reloadedStep.getTokenCredentialId());
         // Data bound setter fields
         assertEquals(apiUrl, reloadedStep.getApiHost());
