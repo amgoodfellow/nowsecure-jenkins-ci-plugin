@@ -28,12 +28,12 @@ First, find this extension in the [Jenkins Plugin Marketplace](https://plugins.j
 
 Then install it following [Jenkin's instructions](https://www.jenkins.io/doc/book/managing/plugins/#installing-a-plugin) on installing marketplace plugins.
 
-**NOTE:** Currently, compatibility is limited to either Windows / Linux running an X64 architecture, or MacOS on ARM.
-In order for the extension to work, please make sure you are running on an appropriate `vmImage`.
+**NOTE:** Note: Current compatibility is limited to Windows and Linux running X64 architecture, or Mac with Apple Silicon.
+In order for the extension to work, please make sure you are running on an appropriate worker node.
 
 ### Configuration
 
-To add this component to your CI/CD pipeline, the following should be done:
+Perform the following to add this component to your CI/CD pipeline:
 
 - Get a token from your NowSecure platform instance. More information on this can be found in the [NowSecure Support Portal](https://support.nowsecure.com/hc/en-us/articles/7499657262093-Creating-a-NowSecure-Platform-API-Bearer-Token).
 - Identify the ID of the group in NowSecure Platform that you want your assessment to be included in. More information on this can be found in the
