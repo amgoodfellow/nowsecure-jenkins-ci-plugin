@@ -1,6 +1,3 @@
-> [!WARNING]
-> This plugin is still in development. For the current version, please see NowSecure's [auto-jenkins-plugin](https://github.com/nowsecure/auto-jenkins-plugin)
-
 # nowsecure-jenkins-ci-plugin
 
 NowSecure provides purpose-built, fully automated mobile application security testing (static and dynamic) for your development pipeline.
@@ -28,7 +25,7 @@ First, find this extension in the [Jenkins Plugin Marketplace](https://plugins.j
 
 Then install it following [Jenkin's instructions](https://www.jenkins.io/doc/book/managing/plugins/#installing-a-plugin) on installing marketplace plugins.
 
-**NOTE:** Note: Current compatibility is limited to Windows and Linux running X64 architecture, or Mac with Apple Silicon.
+**NOTE:** Current compatibility is limited to Windows and Linux running X64 architecture, or Mac with Apple Silicon.
 In order for the extension to work, please make sure you are running on an appropriate worker node.
 
 ### Configuration
