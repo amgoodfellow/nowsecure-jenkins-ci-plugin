@@ -25,7 +25,7 @@
             env = [
               {
                 name = "JAVA_HOME";
-                value = "${pkgs.jdk21}";
+                value = "${pkgs.jdk17}";
               }
             ];
             commands = [
@@ -41,7 +41,7 @@
               }
             ];
             packages = [
-              pkgs.jdk21
+              pkgs.jdk17
               pkgs.maven
               pkgs.jdt-language-server
               pkgs.nixpkgs-fmt
