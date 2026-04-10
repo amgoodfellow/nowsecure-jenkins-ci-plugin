@@ -30,12 +30,13 @@
     <revision>0.1.0</revision>
     <changelist>999999-SNAPSHOT</changelist>
     <!-- Note: this is mainly determined by the credentials and plain-credentials plugin -->
-    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.baseline>2.541</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     <spotless.check.skip>false</spotless.check.skip>
     <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
+    <project.build.outputTimestamp>2024-01-01T00:00:02Z</project.build.outputTimestamp>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -43,7 +44,7 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>5054.v620b_5d2b_d5e6</version>
+        <version>6005.v4235c33d86a_5</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
