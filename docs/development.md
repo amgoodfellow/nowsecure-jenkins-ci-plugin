@@ -8,8 +8,9 @@ This is a standard Jenkins plugin built with Java and Maven.
 * **Apache Maven** 3.9.0 or newer.
 
 > [!TIP]
-> If you have nix setup, you can use the nix flake in the root of the project
-> to install all project dependencies for you!
+> If you have Nix set up, you can use the Nix flake in the root of the project
+> to install all project dependencies automatically. The flake also exposes
+> named commands once you're inside the shell
 
 ### Building and Running Locally
 
@@ -17,7 +18,6 @@ This is a standard Jenkins plugin built with Java and Maven.
     ```bash
     mvn clean package
     ```
-    This will compile the code, run tests, and create the plugin file at `target/ci-assessments.hpi`.
 
 2.  **Run a local Jenkins instance for development:**
     ```bash

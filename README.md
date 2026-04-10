@@ -7,50 +7,56 @@ NowSecure quickly identifies and details real issues, provides remediation recom
 
 This integration requires a NowSecure platform license. See <https://www.nowsecure.com> for more information.
 
+
 ## Getting Started
-
-### Dependencies
-
-This Jenkins plugin requires the following plugins:
-- Credentials: https://plugins.jenkins.io/credentials/
-- Plain Credentials: https://plugins.jenkins.io/plain-credentials/
-
-These plugins are already installed in over 90% of Jenkins instances according to usage statistics, so most consumers of this plugin will not need to explicitly install these.
-
-Note: This plugin will require the minimum Jenkins version as specified by the above two plugins. At the moment, that's version 2.479 requiring Java 17 or Java 21.
 
 ### Installation
 
-First, find this extension in the [Jenkins Plugin Marketplace](https://plugins.jenkins.io/)
+Find this plugin in the [Jenkins Plugin Marketplace](https://plugins.jenkins.io/) and install it following [Jenkins' instructions](https://www.jenkins.io/doc/book/managing/plugins/#installing-a-plugin).
 
-Then install it following [Jenkin's instructions](https://www.jenkins.io/doc/book/managing/plugins/#installing-a-plugin) on installing marketplace plugins.
-
-**NOTE:** Current compatibility is limited to Windows and Linux running X64 architecture, or Mac with Apple Silicon.
-In order for the extension to work, please make sure you are running on an appropriate worker node.
+> [!NOTE] This plugin requires a worker node running Linux (x86_64), Windows (x86_64), or macOS (Apple Silicon). Builds dispatched to other architectures will fail.
 
 ### Configuration
 
-Perform the following to add this component to your CI/CD pipeline:
+### 1. Create a NowSecure API token
 
-- Get a token from your NowSecure platform instance. More information on this can be found in the [NowSecure Support Portal](https://support.nowsecure.com/hc/en-us/articles/7499657262093-Creating-a-NowSecure-Platform-API-Bearer-Token).
-- Identify the ID of the group in NowSecure Platform that you want your assessment to be included in. More information on this can be found in the
-  [NowSecure Support Portal](https://support.nowsecure.com/hc/en-us/articles/38057956447757-Retrieve-Reference-and-ID-Numbers-for-API-Use-Task-ID-Group-App-and-Assessment-Ref).
-- Add a `StringCredentials` secret as shown in the documentation for the [Plain Credentials Plugin](https://plugins.jenkins.io/plain-credentials/#plugin-content-description).
-  Set the `Secret` to the value of the token created above.
+Generate an API token from your NowSecure platform instance. See the
+[NowSecure Support Portal][create-token] for instructions.
 
-## Job Parameters
+[create-token]: https://support.nowsecure.com/hc/en-us/articles/7499657262093-Creating-a-NowSecure-Platform-API-Bearer-Token
 
-The NowSecure Azure CI Extension supports the following parameters:
+### 2. Add the token as a Jenkins credential
 
+Add the token as a **Secret Text** credential in Jenkins following the [Plain Credentials Plugin documentation](https://plugins.jenkins.io/plain-credentials/#plugin-content-description). Note the credential ID you assign — you will need it in the next step.
 
-| Name | Description | Default Value |
-|------|-------------|---------------|
-| `group` | Defines the group reference that is used to trigger assessments. Information on how to get the group reference can be found in the[NowSecure Support Portal](https://support.nowsecure.com/hc/en-us/articles/38057956447757-Retrieve-Reference-and-ID-Numbers-for-API-Use-Task-ID-Group-App-and-Assessment-Ref) | |
-| `token` | Defines the token used to communicate with the NowSecure API. This token should be stored as a secret. Information on how to create a token can be found in the [NowSecure Support Portal](https://support.nowsecure.com/hc/en-us/articles/7499657262093-Creating-a-NowSecure-Platform-API-Bearer-Token). | |
-| `binary_file` | Defines the path to the mobile application binary to be processed by NowSecure | |
-| `ui_host` | Defines the NowSecure base UI to use. This will not change unless you are leveraging a single tenant. | <https://app.nowsecure.com> |
-| `api_host` | Defines the NowSecure base API to use. This will not change unless you are leveraging a single tenant. | <https://lab-api.nowsecure.com> |
-| `log_level` | Defines the log level set for the NowSecure analysis task. | `info` | | `analysis_type` | Defines the type of analyst that you want to run. Options are `static` for a static only assessment or `full` for both a static and dynamic assessment. | `static` |
-| `artifacts_dir` | Defines the directory for nowsecure artifacts to be output to. In the case of the default assessment results would be `./artifacts/nowsecure/assessment.json` | |
-| `polling_duration_minutes` | Defines the length of time (in minutes) to poll for job completion. | If `analysis_type` is `static`, 30. If `full`, 60 |
-| `minimum_score` | Defines the score under which an assessment will fail | -1 |
+### 3. Get Your NowSecure Group ID
+
+Identify the ID of the NowSecure Platform group you want assessments to be associated with. See the [NowSecure Support Portal](retrieve-ids) for instructions.
+
+[retrieve-ids]: https://support.nowsecure.com/hc/en-us/articles/38057956447757-Retrieve-Reference-and-ID-Numbers-for-API-Use-Task-ID-Group-App-and-Assessment-Ref
+### 4. Add the build step
+
+Add the `NowSecure Assessment Configuration` build step to your job and fill in the required fields.
+
+## Parameter Reference
+
+### Required
+
+| Name | Description |
+|------|-------------|
+| `binaryFilePath` | Path to the mobile application binary (`.ipa` or `.apk`) relative to the workspace root. |
+| `group` | The NowSecure group reference ID to associate the assessment with. See the [NowSecure Support Portal](https://support.nowsecure.com/hc/en-us/articles/38057956447757-Retrieve-Reference-and-ID-Numbers-for-API-Use-Task-ID-Group-App-and-Assessment-Ref) for how to find this value. |
+| `tokenCredentialId` | The Jenkins credential ID of the **Secret Text** credential containing your NowSecure API bearer token. |
+
+### Optional
+
+| Name | Description | Default |
+|------|-------------|---------|
+| `artifactDir` | Directory (relative to workspace) where NowSecure output files are written. The assessment result JSON will be at `<artifactDir>/assessment.json`. | `nowsecure` |
+| `analysisType` | Type of assessment to run. `STATIC` runs static analysis only; `FULL` runs both static and dynamic analysis. | `STATIC` |
+| `minimumScore` | The assessment score below which the build will be marked as failed. Set to `0` to disable score gating. | `0` |
+| `pollingDurationMinutes` | How long (in minutes) to wait for the assessment to complete before timing out. | `20` |
+| `apiHost` | NowSecure API base URL. Only change this if you are on a single-tenant NowSecure instance. | `https://lab-api.nowsecure.com` |
+| `uiHost` | NowSecure UI base URL. Only change this if you are on a single-tenant NowSecure instance. | `https://app.nowsecure.com` |
+| `logLevel` | Log verbosity for the NowSecure assessment task. One of `DEBUG`, `INFO`, `WARN`, `ERROR`. | `INFO` |
+
