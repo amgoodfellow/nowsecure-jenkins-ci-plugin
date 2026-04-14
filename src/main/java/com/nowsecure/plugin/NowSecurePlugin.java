@@ -2,9 +2,7 @@ package com.nowsecure.plugin;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.nowsecure.models.AnalysisType;
 import com.nowsecure.models.LogLevel;
 import com.nowsecure.models.NowSecureBinary;
@@ -18,6 +16,7 @@ import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Computer;
 import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
@@ -69,18 +68,6 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         this.tokenCredentialId = Util.fixEmptyAndTrim(tokenCredentialId);
     }
 
-    private Optional<StringCredentials> getCredentials(String credentialsId) {
-        return CredentialsMatchers.filter(
-                        CredentialsProvider.lookupCredentialsInItemGroup(
-                                StringCredentials.class,
-                                Jenkins.get(),
-                                hudson.security.ACL.SYSTEM2,
-                                Collections.<DomainRequirement>emptyList()),
-                        CredentialsMatchers.withId(credentialsId))
-                .stream()
-                .findFirst();
-    }
-
     private Map<String, String> getProxyEnvVars(ProxyConfiguration configuration) {
         if (configuration == null) {
             return Map.of();
@@ -123,7 +110,11 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         final var osName = getStringProperty(worker, "os.name");
 
         final var binaryFile = workspace.child(binaryFilePath);
-        final var optionalCredentials = getCredentials(tokenCredentialId);
+
+        // this method evaluates expressions and tracks usage for the current run - something that was previously done
+        // manually
+        final var optionalCredentials = Optional.ofNullable(
+                CredentialsProvider.findCredentialById(tokenCredentialId, StringCredentials.class, run));
 
         if (!binaryFile.exists()) {
             var errorMessage = String.format("Cannot find binary file at path: %s", binaryFile.toURI());
@@ -137,11 +128,8 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             throw new AbortException(errorMessage);
         }
 
-        // According to docs, this is our responsibility to do for credential tracking:
-        // https://github.com/jenkinsci/credentials-plugin/blob/master/docs/consumer.adoc#track-usage-of-a-credential-against-specific-jenkins-context-objects
+        // findCredentialsById already tracked usage against this Run automatically.
         final var credential = optionalCredentials.get();
-        CredentialsProvider.track(run, credential);
-
         final var token = credential.getSecret().getPlainText();
 
         final var tool = new NowSecureBinary(arch, osName, workspace)
@@ -234,7 +222,49 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-        @POST // Has to be of the form 'doFill<FieldName>Items'
+        // Has to be of the form 'doCheck<FieldName>' to match the tokenCredentialId field.
+        @POST
+        public FormValidation doCheckTokenCredentialId(@AncestorInPath Item item, @QueryParameter String value) {
+            // Item represents the job or folder the form is within. A `null` value means that we're in the global
+            // context
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return FormValidation.ok();
+                }
+            } else if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                return FormValidation.ok();
+            }
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.error("Token Credential cannot be empty");
+            }
+            if (value.startsWith("${") && value.endsWith("}")) {
+                return FormValidation.warning("Cannot validate expression-based credentials");
+            }
+            // 'listCredentialsInItem' don't access the underlying credential value
+            // so don't count as credential store usage during form validation
+            boolean found = item != null
+                    ? !CredentialsProvider.listCredentialsInItem(
+                                    StringCredentials.class,
+                                    item,
+                                    hudson.security.ACL.SYSTEM2,
+                                    Collections.emptyList(),
+                                    CredentialsMatchers.withId(value))
+                            .isEmpty()
+                    : !CredentialsProvider.listCredentialsInItemGroup(
+                                    StringCredentials.class,
+                                    Jenkins.get(),
+                                    hudson.security.ACL.SYSTEM2,
+                                    Collections.emptyList(),
+                                    CredentialsMatchers.withId(value))
+                            .isEmpty();
+            if (!found) {
+                return FormValidation.error("Cannot find the selected credentials");
+            }
+            return FormValidation.ok();
+        }
+
+        // Has to be of the form 'doFill<FieldName>Items' to match the tokenCredentialId field.
+        @POST
         public ListBoxModel doFillTokenCredentialIdItems(
                 @AncestorInPath Item item, @QueryParameter String tokenCredentialId) {
             StandardListBoxModel result = new StandardListBoxModel();
@@ -242,19 +272,33 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return result.includeCurrentValue(tokenCredentialId);
                 }
-            } else {
-                if (!item.hasPermission(Item.EXTENDED_READ)) {
-                    return result.includeCurrentValue(tokenCredentialId);
-                }
+            } else if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                return result.includeCurrentValue(tokenCredentialId);
             }
+            return item != null
+                    ? fillCredentials(result, item, tokenCredentialId)
+                    : fillCredentials(result, Jenkins.get(), tokenCredentialId);
+        }
 
+        private static ListBoxModel fillCredentials(StandardListBoxModel result, Item item, String currentValue) {
             return result.includeMatchingAs(
                             hudson.security.ACL.SYSTEM2,
-                            Jenkins.get(),
-                            StandardCredentials.class,
-                            Collections.emptyList(), // No domain requirements
+                            item,
+                            StringCredentials.class,
+                            Collections.emptyList(),
                             CredentialsMatchers.always())
-                    .includeCurrentValue(tokenCredentialId);
+                    .includeCurrentValue(currentValue);
+        }
+
+        private static ListBoxModel fillCredentials(
+                StandardListBoxModel result, ItemGroup<?> context, String currentValue) {
+            return result.includeMatchingAs(
+                            hudson.security.ACL.SYSTEM2,
+                            context,
+                            StringCredentials.class,
+                            Collections.emptyList(),
+                            CredentialsMatchers.always())
+                    .includeCurrentValue(currentValue);
         }
     }
 

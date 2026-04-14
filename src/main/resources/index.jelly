@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <div>
 <p>
-NowSecure provides purpose-built, fully automated mobile application security testing (static and dynamic) for your development pipeline. By testing your mobile application binary post-build from Azure, NowSecure ensures comprehensive coverage of newly developed code, third party components, and system dependencies.
+NowSecure provides purpose-built, fully automated mobile application security testing (static and dynamic) for your development pipeline. By testing your mobile application binary post-build from Jenkins, NowSecure ensures comprehensive coverage of newly developed code, third party components, and system dependencies.
 </p>
 <p>
 NowSecure quickly identifies and details real issues, provides remediation recommendations, and integrates with ticketing systems such as Azure DevOps and Jira.
